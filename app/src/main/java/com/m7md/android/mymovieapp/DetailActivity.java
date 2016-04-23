@@ -2,21 +2,26 @@ package com.m7md.android.mymovieapp;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+
 public class DetailActivity extends AppCompatActivity {
     TextView movieTitle, movieDate, movieDeuration, movieRate, overView;
     Movie movie;
+    ListView trailerList;
+    ArrayList<Movie> movies;
 
     Button favourite;
     LinearLayout trailer1, trailer2;
@@ -37,8 +42,9 @@ public class DetailActivity extends AppCompatActivity {
         movieRate = (TextView) findViewById(R.id.movie_rate);
         overView = (TextView) findViewById(R.id.overview);
         favourite = (Button) findViewById(R.id.fav_btn);
-        trailer1 = (LinearLayout) findViewById(R.id.trailer1);
-        trailer2 = (LinearLayout) findViewById(R.id.trailer2);
+      /*  trailer1 = (LinearLayout) findViewById(R.id.trailer1);
+        trailer2 = (LinearLayout) findViewById(R.id.trailer2);*/
+        trailerList = (ListView) findViewById(R.id.trailer_list);
 
 
         Intent intent = getIntent();
@@ -52,13 +58,29 @@ public class DetailActivity extends AppCompatActivity {
         movieRate.setText(movie.getVote_average() + "/10");
         overView.setText(movie.getOverview());
 
+        MainActivity.itemsTask itemsTask = new MainActivity.itemsTask();
+        itemsTask.setContext(getBaseContext());
+        itemsTask.execute(movie.getID() + "", "trailer");
+        try {
+            movies = itemsTask.get();
+            movie.setTrailer(movies.get(0).getTrailer());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        trailerAdapter listAdapter = new trailerAdapter(this, movies);
+
+
+        trailerList.setAdapter(listAdapter);
 
         favourite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 MovieDB movieDB = new MovieDB(getBaseContext());
 
-                int updated = movieDB.updateMovie(movie.getID());
+                int updated = movieDB.updateFavourite(movie.getID());
                 if (updated == 0) {
                     Toast.makeText(getBaseContext(), "Failed Adding To Favourite :(", Toast.LENGTH_SHORT).show();
                 } else {
@@ -70,12 +92,12 @@ public class DetailActivity extends AppCompatActivity {
         });
 
 
-        trailer1.setOnClickListener(new View.OnClickListener() {
+      /*  trailer1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_VIEW,
                         Uri.parse("vnd.youtube:"
-                                + "ZVzL94jZNdU"));
+                                + movie.getTrailer()));
                 startActivity(intent);
 
             }
@@ -92,7 +114,7 @@ public class DetailActivity extends AppCompatActivity {
 
 
             }
-        });
+        });*/
 
     }
 

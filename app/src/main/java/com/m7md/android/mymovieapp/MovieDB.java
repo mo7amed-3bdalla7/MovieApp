@@ -25,20 +25,25 @@ public class MovieDB extends SQLiteOpenHelper {
                 "poster_path varchar(100)," +
                 "title  varchar(100)," +
                 "vote_average  varchar(100)," +
-                "overview varchar(100)," +
+                "overview text," +
                 "minutes varchar(100)," +
+                "trailer varchar(100)," +
                 "favourite integer(1)," +
                 "release_date varchar(100));");
 
     }
 
-    public int updateMovie(int id) {
+    public int updateFavourite(int id) {
 
 
         ContentValues movieDetails = new ContentValues();
         movieDetails.put("favourite", 1);
 
         return getWritableDatabase().update("movie", movieDetails, "id=" + id, null);
+    }
+
+    public int updateMovie(ContentValues movieDetails) {
+        return getWritableDatabase().update("movie", movieDetails, "id=" + movieDetails.getAsInteger("id"), null);
     }
 
     public long insertMovie(Movie movie) {

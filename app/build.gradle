@@ -12,7 +12,7 @@ android {
         versionName "1.0"
     }
     buildTypes.each {
-        it.buildConfigField 'String', 'MOVIE_API_KEY', "Put your api key here"
+        it.buildConfigField 'String', 'MOVIE_API_KEY', "Put Your Api Key Here"
     }
     buildTypes {
         release {

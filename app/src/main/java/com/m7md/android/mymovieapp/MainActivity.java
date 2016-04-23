@@ -1,5 +1,7 @@
 package com.m7md.android.mymovieapp;
 
+import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -27,7 +29,6 @@ import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
     GridView gridView;
-    MovieDB movieDB;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -62,9 +63,10 @@ public class MainActivity extends AppCompatActivity {
         gridView = (GridView) findViewById(R.id.gridView);
 
         itemsTask itemsTask = new itemsTask();
+        itemsTask.setContext(getBaseContext());
 
 
-        itemsTask.execute(type);
+        itemsTask.execute(type, "");
 
         try {
 
@@ -73,9 +75,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         } catch (InterruptedException e) {
-            Toast.makeText(getBaseContext(),""+e, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getBaseContext(), "" + e, Toast.LENGTH_SHORT).show();
         } catch (ExecutionException e) {
-            Toast.makeText(getBaseContext(), ""+e, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getBaseContext(), "" + e, Toast.LENGTH_SHORT).show();
         }
 
 
@@ -89,17 +91,21 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        movieDB = new MovieDB(getBaseContext());
         taskFactory("popular");
 
     }
 
 
-    class itemsTask extends AsyncTask<String, String, ArrayList<Movie>> {
+    public static class itemsTask extends AsyncTask<String, String, ArrayList<Movie>> {
+        MovieDB movieDB;
+
+        Context context;
 
         @Override
         protected ArrayList<Movie> doInBackground(String... params) {
+            movieDB = new MovieDB(context);
 
+            String url = null;
             HttpURLConnection connection = null;
             BufferedReader reader = null;
             if (params[0] == null)
@@ -110,10 +116,13 @@ public class MainActivity extends AppCompatActivity {
                 return fetchMovies(-1);
 
 
+            if (params[1] == "trailer") {
+                url = "http://api.themoviedb.org/3/movie/" + params[0] + "/videos";
 
+            } else {
 
-
-            String url = "http://api.themoviedb.org/3/movie/" + params[0];
+                url = "http://api.themoviedb.org/3/movie/" + params[0];
+            }
             String moviesJson;
 
             try {
@@ -144,12 +153,17 @@ public class MainActivity extends AppCompatActivity {
                     return null;
                 }
                 moviesJson = buffer.toString();
+                if (params[1] == "trailer") {
+                    ;
+                    return parseTrailer(moviesJson, Integer.parseInt(params[0]));
+
+                }
                 return parseJson(moviesJson);
 
             } catch (MalformedURLException e) {
-                Toast.makeText(getBaseContext(), "error1", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "error1", Toast.LENGTH_SHORT).show();
             } catch (IOException e) {
-               return fetchMovies(0);
+                return fetchMovies(0);
 
             }
 
@@ -157,9 +171,7 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
 
-
-
-        private ArrayList fetchMovies(int flag){
+        private ArrayList fetchMovies(int flag) {
             Cursor cursor = movieDB.selectMovie(flag);
 
             ArrayList<Movie> allMovies = new ArrayList<>();
@@ -176,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
                     movie.setPoster_path(cursor.getString(cursor.getColumnIndex("poster_path")));
                     movie.setRelease_date(cursor.getString(cursor.getColumnIndex("release_date")));
                     movie.setMinutes(cursor.getString(cursor.getColumnIndex("minutes")));
+                    movie.setTrailer(cursor.getString(cursor.getColumnIndex("trailer")));
 
 
                     allMovies.add(movie);
@@ -225,12 +238,55 @@ public class MainActivity extends AppCompatActivity {
 
 
             } catch (JSONException e) {
-                Toast.makeText(getBaseContext(), "444555888", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "444555888", Toast.LENGTH_SHORT).show();
             }
 
 
             return allMovies;
         }
+
+
+        public Context getContext() {
+            return context;
+        }
+
+        public void setContext(Context context) {
+            this.context = context;
+        }
+
+
+        private ArrayList<Movie> parseTrailer(String jsonString, int id) {
+            ArrayList<Movie> movies = new ArrayList<>();
+            Movie movie;
+
+            try {
+                JSONObject moviesObject = new JSONObject(jsonString);
+                JSONArray resultArray = moviesObject.getJSONArray("results");
+
+                for (int i = 0; i < resultArray.length(); i++) {
+                    movie = new Movie();
+                    JSONObject jsonObject = resultArray.getJSONObject(i);
+                    movie.setTrailer(jsonObject.getString("key"));
+                    Cursor cursor = movieDB.selectMovie(id);
+                    if (cursor.getCount() == 1) {
+                        ContentValues movieDetails = new ContentValues();
+                        movieDetails.put("id", id);
+                        movieDetails.put("trailer", movie.getTrailer());
+//
+                        long inserted = movieDB.updateMovie(movieDetails);
+                    }
+                    movies.add(movie);
+                }
+
+
+            } catch (JSONException e) {
+                Toast.makeText(context, e + "", Toast.LENGTH_SHORT).show();
+            }
+
+
+            return movies;
+        }
+
 
     }
 

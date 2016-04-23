@@ -9,23 +9,22 @@ import java.util.Date;
  * Created by m7md on 3/25/16.
  */
 public class Movie implements Serializable {
-    public int getID() {
-        return ID;
-    }
+    private String Trailer;
 
     private int ID;
+
     private String poster_path;
+
     private String title;
     private String vote_average;
     private String overview;
     private String minutes;
-
-
     private int favourite;
 
     public String getRelease_date() {
         return release_date;
     }
+
 
     private String release_date;
 
@@ -96,5 +95,17 @@ public class Movie implements Serializable {
 
     public void setFavourite(int favourite) {
         this.favourite = favourite;
+    }
+
+    public void setTrailer(String trailer) {
+        Trailer = trailer;
+    }
+
+    public String getTrailer() {
+        return Trailer;
+    }
+
+    public int getID() {
+        return ID;
     }
 }

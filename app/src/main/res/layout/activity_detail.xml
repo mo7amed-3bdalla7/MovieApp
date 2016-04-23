@@ -104,53 +104,14 @@
                 android:padding="15px"
                 android:text="Trailers:"/>
 
-            <LinearLayout
-                android:id="@+id/trailer1"
-
+            <ListView
+                android:id="@+id/trailer_list"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:adjustViewBounds="true"
-                    android:src="@drawable/ic_play_arrow_black_18dp"
-                    />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="30dp"
-                    android:text="Trailer 1"
-                    />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/trailer2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:adjustViewBounds="true"
-                    android:src="@drawable/ic_play_arrow_black_18dp"
-                    />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="30dp"
-                    android:text="Trailer 2"
-                    />
-
-            </LinearLayout>
+                android:layout_height="200dp"
+                ></ListView>
         </LinearLayout>
+
+
     </ScrollView>
 
 </FrameLayout>
