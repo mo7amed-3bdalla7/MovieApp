@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements DetailFragment.On
         sharingIntent.setType("text/plain");
         String shareBody = "This A " + cursor.getString(cursor.getColumnIndex("title")) + " Movie Details \n" +
                 "Overview :  " + cursor.getString(cursor.getColumnIndex("overview"));
-        sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject Here");
+        sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Movie");
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
         startActivity(Intent.createChooser(sharingIntent, "Share via"));
 
