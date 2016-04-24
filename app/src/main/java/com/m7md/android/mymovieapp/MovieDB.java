@@ -67,6 +67,8 @@ public class MovieDB extends SQLiteOpenHelper {
             return getWritableDatabase().rawQuery("select * from movie", null);
         } else if (id == -1) {
             return getWritableDatabase().rawQuery("select * from movie where favourite=1", null);
+        } else if (id == -2) {
+            return getWritableDatabase().rawQuery("select * from movie limit 1", null);
         } else {
             return getWritableDatabase().rawQuery("select * from movie where id =" + id, null);
 

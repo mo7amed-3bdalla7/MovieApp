@@ -61,10 +61,18 @@ public class GridAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
 
+                if (MainActivity.landscape) {
+                    Intent intent = new Intent(mContext, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("movie", movie);
+                    mContext.startActivity(intent);
 
-                Intent intent = DetailActivity.setIntent(mContext, movie);
 
-                mContext.startActivity(intent);
+                } else {
+                    Intent intent = DetailActivity.setIntent(mContext, movie);
+
+                    mContext.startActivity(intent);
+                }
             }
         });
 

@@ -60,12 +60,21 @@ public class trailerAdapter extends BaseAdapter {
         trailer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                try {
 
-                Intent intent = new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("vnd.youtube:"
-                                + movie.getTrailer()));
-                mContext.startActivity(intent);
+                    Intent intent = new Intent(Intent.ACTION_VIEW,
+                            Uri.parse("vnd.youtube:"
+                                    + movie.getTrailer()));
+                    mContext.startActivity(intent);
 
+                } catch (Exception e) {
+
+                    Intent intent = new Intent(Intent.ACTION_VIEW,
+                            Uri.parse("https://www.youtube.com/v?"
+                                    + movie.getTrailer()));
+                    mContext.startActivity(intent);
+
+                }
 
             }
         });

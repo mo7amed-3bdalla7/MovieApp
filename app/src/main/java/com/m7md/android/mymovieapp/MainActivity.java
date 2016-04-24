@@ -2,14 +2,17 @@ package com.m7md.android.mymovieapp;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.GridView;
 import android.widget.Toast;
 
@@ -27,19 +30,25 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DetailFragment.OnItemSelectedListener {
     GridView gridView;
+    static boolean landscape;
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
+
+
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+
         switch (item.getItemId()) {
             case R.id.popular:
                 taskFactory("popular");
@@ -50,11 +59,29 @@ public class MainActivity extends AppCompatActivity {
             case R.id.favourite:
                 taskFactory("favourite");
                 break;
+            case R.id.menu_item_share:
+                setShareIntent();
+                break;
             default:
                 taskFactory("popular");
         }
 
         return true;
+    }
+
+    private void setShareIntent() {
+
+
+        Cursor cursor = new MovieDB(this).selectMovie(-2);
+        cursor.moveToFirst();
+        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+        sharingIntent.setType("text/plain");
+        String shareBody = "This A " + cursor.getString(cursor.getColumnIndex("title")) + " Movie Details \n" +
+                "Overview :  " + cursor.getString(cursor.getColumnIndex("overview"));
+        sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject Here");
+        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+        startActivity(Intent.createChooser(sharingIntent, "Share via"));
+
     }
 
     void taskFactory(String type) {
@@ -90,9 +117,40 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
+        landscape = checkShow();
+        if (landscape) {
+            setContentView(R.layout.fragment_activity);
+            Intent intent = getIntent();
+            Movie movie = (Movie) intent.getSerializableExtra("movie");
+            if (movie == null) {
+                View view = findViewById(R.id.detailFragment);
+                view.setVisibility(View.INVISIBLE);
+            } else {
+                View view = findViewById(R.id.detailFragment);
+                view.setVisibility(View.VISIBLE);
+            }
+        } else {
+            setContentView(R.layout.activity_main);
+        }
         taskFactory("popular");
 
+    }
+
+
+    public boolean checkShow() {
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        int height = displaymetrics.heightPixels;
+        int width = displaymetrics.widthPixels;
+
+        return (width > height);
+    }
+
+    @Override
+    public void onRssItemSelected(String link) {
+        DetailFragment fragment = (DetailFragment) getFragmentManager().findFragmentById(R.id.detailFragment);
+        fragment.displayFrame();
     }
 
 
@@ -238,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
 
 
             } catch (JSONException e) {
-                Toast.makeText(context, "444555888", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Testttttttttttt", Toast.LENGTH_SHORT).show();
             }
 
 
