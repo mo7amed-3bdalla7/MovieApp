@@ -56,7 +56,7 @@ public class DetailFragment extends Fragment {
 
 
         Intent intent = getActivity().getIntent();
-        movie = (Movie) intent.getSerializableExtra(MOVIE);
+        movie = (Movie) intent.getParcelableExtra(MOVIE);
 
         if (movie != null) {
 

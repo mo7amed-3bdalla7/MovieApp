@@ -1,6 +1,8 @@
 package com.m7md.android.mymovieapp;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -8,7 +10,7 @@ import java.util.Date;
 /**
  * Created by m7md on 3/25/16.
  */
-public class Movie implements Serializable {
+public class Movie implements Parcelable {
     private String Trailer;
 
     private int ID;
@@ -20,6 +22,33 @@ public class Movie implements Serializable {
     private String overview;
     private String minutes;
     private int favourite;
+
+    public Movie() {
+    }
+
+    protected Movie(Parcel in) {
+        Trailer = in.readString();
+        ID = in.readInt();
+        poster_path = in.readString();
+        title = in.readString();
+        vote_average = in.readString();
+        overview = in.readString();
+        minutes = in.readString();
+        favourite = in.readInt();
+        release_date = in.readString();
+    }
+
+    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
 
     public String getRelease_date() {
         return release_date;
@@ -107,5 +136,23 @@ public class Movie implements Serializable {
 
     public int getID() {
         return ID;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(Trailer);
+        dest.writeInt(ID);
+        dest.writeString(poster_path);
+        dest.writeString(title);
+        dest.writeString(vote_average);
+        dest.writeString(overview);
+        dest.writeString(minutes);
+        dest.writeInt(favourite);
+        dest.writeString(release_date);
     }
 }
