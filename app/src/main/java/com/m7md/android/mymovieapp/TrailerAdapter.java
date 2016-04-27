@@ -15,11 +15,11 @@ import java.util.ArrayList;
 /**
  * Created by m7md on 4/23/16.
  */
-public class trailerAdapter extends BaseAdapter {
+public class TrailerAdapter extends BaseAdapter {
     private final Context mContext;
     ArrayList<Movie> movies;
 
-    trailerAdapter(Context context, ArrayList<Movie> items) {
+    TrailerAdapter(Context context, ArrayList<Movie> items) {
         mContext = context;
         this.movies = items;
 
@@ -70,7 +70,7 @@ public class trailerAdapter extends BaseAdapter {
                 } catch (Exception e) {
 
                     Intent intent = new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("https://www.youtube.com/v?"
+                            Uri.parse("https://www.youtube.com/watch?v="
                                     + movie.getTrailer()));
                     mContext.startActivity(intent);
 

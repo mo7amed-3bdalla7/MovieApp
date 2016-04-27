@@ -1,7 +1,6 @@
 package com.m7md.android.mymovieapp;
 
 import android.app.Fragment;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,14 +23,14 @@ import java.util.concurrent.ExecutionException;
  * Created by m7md on 4/23/16.
  */
 public class DetailFragment extends Fragment {
-    TextView movieTitle, movieDate, movieDeuration, movieRate, overView;
-    Movie movie;
-    ListView trailerList;
-    ArrayList<Movie> movies;
+    private TextView movieTitle, movieDate, movieDeuration, movieRate, overView;
+    private Movie movie;
+    private ArrayList<Movie> movies;
+    private ArrayList<Review> reviews;
 
-    Button favourite;
+    private Button favourite;
     private static final String MOVIE = "movie";
-    private OnItemSelectedListener listener;
+    private ListView reviewsList, trailerList;
 
     @Nullable
     @Override
@@ -50,9 +50,9 @@ public class DetailFragment extends Fragment {
         movieRate = (TextView) view.findViewById(R.id.movie_rate);
         overView = (TextView) view.findViewById(R.id.overview);
         favourite = (Button) view.findViewById(R.id.fav_btn);
-      /*  trailer1 = (LinearLayout) findViewById(R.id.trailer1);
-        trailer2 = (LinearLayout) findViewById(R.id.trailer2);*/
+
         trailerList = (ListView) view.findViewById(R.id.trailer_list);
+        reviewsList = (ListView) view.findViewById(R.id.Reviews_list);
 
 
         Intent intent = getActivity().getIntent();
@@ -67,11 +67,16 @@ public class DetailFragment extends Fragment {
             movieRate.setText(movie.getVote_average() + "/10");
             overView.setText(movie.getOverview());
 
-            MainActivity.itemsTask itemsTask = new MainActivity.itemsTask();
-            itemsTask.setContext(getActivity());
-            itemsTask.execute(movie.getID() + "", "trailer");
+            ItemsTask trailerTask = new ItemsTask();
+            trailerTask.setContext(getActivity());
+            trailerTask.execute(movie.getID() + "", "trailer");
+
+            ItemsTask reviewsTask = new ItemsTask();
+            reviewsTask.setContext(getActivity());
+            reviewsTask.execute(movie.getID() + "", "review");
             try {
-                movies = itemsTask.get();
+                movies = trailerTask.get();
+                reviews = reviewsTask.get();
                 movie.setTrailer(movies.get(0).getTrailer());
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -79,10 +84,15 @@ public class DetailFragment extends Fragment {
                 e.printStackTrace();
             }
 
-            trailerAdapter listAdapter = new trailerAdapter(getActivity(), movies);
+            TrailerAdapter trailerListAdapter = new TrailerAdapter(getActivity(), movies);
+            ReviewsAdapter reviewsListAdapter = new ReviewsAdapter(getActivity(), reviews);
 
 
-            trailerList.setAdapter(listAdapter);
+            trailerList.setAdapter(trailerListAdapter);
+            reviewsList.setAdapter(reviewsListAdapter);
+
+            setListViewHeightBasedOnItems(trailerList);
+            setListViewHeightBasedOnItems(reviewsList);
 
             favourite.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -105,31 +115,36 @@ public class DetailFragment extends Fragment {
         return view;
     }
 
-    public void displayFrame() {
+    public boolean setListViewHeightBasedOnItems(ListView listView) {
 
-        View view = getView().findViewById(R.id.detail_Frame);
-        view.setVisibility(View.INVISIBLE);
-    }
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter != null) {
 
-    public interface OnItemSelectedListener {
-        public void onRssItemSelected(String link);
-    }
+            int numberOfItems = listAdapter.getCount();
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
+            // Get total height of all items.
+            int totalItemsHeight = 0;
+            for (int itemPos = 0; itemPos < numberOfItems; itemPos++) {
+                View item = listAdapter.getView(itemPos, null, listView);
+                item.measure(0, 0);
+                totalItemsHeight += item.getMeasuredHeight();
+            }
 
-        if (context instanceof OnItemSelectedListener) {
-            listener = (OnItemSelectedListener) context;
+            // Get total height of all item dividers.
+            int totalDividersHeight = listView.getDividerHeight() *
+                    (numberOfItems - 1);
+
+            // Set list height.
+            ViewGroup.LayoutParams params = listView.getLayoutParams();
+            params.height = totalItemsHeight + totalDividersHeight;
+            listView.setLayoutParams(params);
+            listView.requestLayout();
+
+            return true;
+
         } else {
-            throw new ClassCastException(context.toString()
-                    + " must implement MyListFragment.OnItemSelectedListener");
+            return false;
         }
-    }
 
-
-    public void updateDetail(String uri) {
-
-        listener.onRssItemSelected("");
     }
 }
